@@ -81,6 +81,8 @@ namespace Compound_Sentry.Controllers
         public async Task<IActionResult> GetProfile()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return NotFound();
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
@@ -529,10 +531,15 @@ namespace Compound_Sentry.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
                 return Unauthorized();
+
+            if (model.CurrentPassword == null || model.NewPassword == null)
+                return BadRequest(new { success = false, message = "Password fields are required" });
 
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
 
@@ -550,6 +557,8 @@ namespace Compound_Sentry.Controllers
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
