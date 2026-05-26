@@ -73,7 +73,7 @@ namespace Compound_Sentry.Services
 
             lock (_lock)
             {
-                if (_ipCache.TryGetValue(macAddress.ToUpper(), out string ip))
+                if (_ipCache.TryGetValue(macAddress.ToUpper(), out string? ip))
                     return ip;
             }
             return "Unknown";
