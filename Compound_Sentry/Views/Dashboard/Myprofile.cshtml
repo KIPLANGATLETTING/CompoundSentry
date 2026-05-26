@@ -1,0 +1,326 @@
+﻿@{
+    ViewData["Title"] = "My Profile - Compound Sentry";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Compound Sentry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #000080 0%, #1a1a6e 50%, #000060 100%);
+                background-size: 200% 200%;
+                animation: gradientFlow 8s ease infinite;
+                min-height: 100vh;
+                color: #e5e7eb;
+            }
+            @@keyframes gradientFlow {
+                0% {
+                    background-position: 0% 0%;
+                }
+
+                50% {
+                    background-position: 100% 100%;
+                }
+
+                100% {
+                    background-position: 0% 0%;
+                }
+            }
+
+            .container {
+                display: flex;
+                min-height: 100vh;
+            }
+
+            /* Sidebar styles (same as dashboard) */
+            .sidebar {
+                width: 280px;
+                background: linear-gradient(135deg, rgba(0, 0, 128, 0.95), rgba(26, 26, 110, 0.95));
+                backdrop-filter: blur(10px);
+                border-right: 1px solid rgba(255, 255, 255, 0.15);
+                padding: 24px 20px;
+                position: fixed;
+                height: 100vh;
+                overflow-y: auto;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding-bottom: 24px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+                margin-bottom: 24px;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #8888ff, #000080);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+            }
+
+            .logo-text {
+                font-size: 18px;
+                font-weight: 700;
+                background: linear-gradient(135deg, #8888ff, #4a4aff);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 16px;
+                margin: 4px 0;
+                border-radius: 10px;
+                color: #b0b0e0;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                text-decoration: none;
+            }
+
+                .nav-item:hover, .nav-item.active {
+                    background: linear-gradient(90deg, rgba(136, 136, 255, 0.2), rgba(0, 0, 128, 0.2));
+                    color: #8888ff;
+                    border-left: 2px solid #8888ff;
+                }
+
+            .main-content {
+                flex: 1;
+                margin-left: 280px;
+                padding: 24px 32px;
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 24px;
+                background: linear-gradient(135deg, rgba(0, 0, 128, 0.5), rgba(26, 26, 110, 0.5));
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 24px;
+            }
+
+            .page-title {
+                font-size: 24px;
+                font-weight: 600;
+                background: linear-gradient(135deg, #8888ff, #4a4aff);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+
+            .card {
+                background: linear-gradient(135deg, rgba(0, 0, 128, 0.5), rgba(26, 26, 110, 0.5));
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 24px;
+                overflow: hidden;
+            }
+
+            .card-header {
+                padding: 16px 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                font-weight: 600;
+                color: #c0c0f0;
+            }
+
+            .profile-info {
+                padding: 30px;
+            }
+
+            .info-row {
+                display: flex;
+                padding: 15px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .info-label {
+                width: 150px;
+                font-weight: 500;
+                color: #8888ff;
+            }
+
+            .info-value {
+                flex: 1;
+                color: #e5e7eb;
+            }
+
+            .btn-edit {
+                margin-top: 20px;
+                padding: 10px 24px;
+                background: linear-gradient(135deg, #8888ff, #4a4aff);
+                border: none;
+                border-radius: 8px;
+                color: white;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            /* User dropdown - FIXED Z-INDEX */
+            .user-info {
+                position: relative;
+                cursor: pointer;
+                z-index: 1001;
+            }
+
+            .avatar-wrapper {
+                position: relative;
+                z-index: 1001;
+            }
+
+            .dropdown-menu {
+                position: absolute;
+                top: 55px;
+                right: 0;
+                background: linear-gradient(135deg, rgba(0, 0, 128, 0.98), rgba(26, 26, 110, 0.98));
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
+                border: 1px solid rgba(136, 136, 255, 0.4);
+                min-width: 220px;
+                display: none;
+                z-index: 10000 !important; /* Increased z-index */
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            }
+
+                .dropdown-menu.show {
+                    display: block;
+                    animation: fadeIn 0.2s ease;
+                }
+
+                .dropdown-menu a {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    color: #e5e7eb;
+                    text-decoration: none;
+                }
+
+                    .dropdown-menu a:hover {
+                        background: rgba(136, 136, 255, 0.2);
+                    }
+            @@media (max-width: 1024px) {
+                .sidebar {
+                    width: 80px;
+                }
+
+                .logo-text, .nav-item span {
+                    display: none;
+                }
+
+                .main-content {
+                    margin-left: 80px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo"><div class="logo-icon">👁️</div><div class="logo-text">Compound Sentry</div></div>
+            <a href="/Dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+            <a href="/Dashboard/Devices" class="nav-item"><i class="fas fa-mobile-alt"></i><span>Devices</span></a>
+            <a href="/Dashboard/Analytics" class="nav-item"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+            <a href="/Dashboard/Settings" class="nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">My Profile</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <div class="avatar" onclick="toggleDropdown()">👤 <i class="fas fa-chevron-down" style="font-size: 12px;"></i></div>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/Dashboard/MyProfile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/Dashboard/AdminSettings"><i class="fas fa-cog"></i> Settings</a>
+                        <hr style="margin:5px 0; border-color:rgba(136,136,255,0.2);">
+                        <a href="/Account/Logout" style="color:#ef4444;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="fas fa-user-circle"></i> Administrator Profile</div>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <div class="info-label">Username</div>
+                        <div class="info-value" id="username">admin</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" id="fullName">System Administrator</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Email</div>
+                        <div class="info-value" id="email">admin@compound.com</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Role</div>
+                        <div class="info-value">Administrator</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value" id="memberSince">-</div>
+                    </div>
+                    <button class="btn-edit" onclick="editProfile()"><i class="fas fa-edit"></i> Edit Profile</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            function toggleDropdown() {
+                const dropdown = document.getElementById('dropdownMenu');
+                dropdown.classList.toggle('show');
+            }
+
+            function editProfile() {
+                // Redirect to settings page for editing
+                window.location.href = '/Dashboard/AdminSettings';
+            }
+
+            // Close dropdown on click outside
+            document.addEventListener('click', function(e) {
+                const dropdown = document.getElementById('dropdownMenu');
+                const avatar = document.querySelector('.avatar');
+                if (!avatar.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            // Fetch user profile data
+            fetch('/api/admin/profile')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('fullName').innerText = data.fullName || 'System Administrator';
+                    document.getElementById('email').innerText = data.email || 'admin@compound.com';
+                    document.getElementById('memberSince').innerText = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : '2024-01-01';
+                })
+                .catch(err => console.error('Error fetching profile:', err));
+    </script>
+</body>
+</html>

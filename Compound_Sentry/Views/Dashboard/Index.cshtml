@@ -1,0 +1,673 @@
+﻿@{
+    ViewData["Title"] = "Compound Sentry Dashboard";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compound Sentry - Live Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #000080 0%, #1a1a6e 50%, #000060 100%);
+            background-size: 200% 200%;
+            animation: gradientFlow 8s ease infinite;
+            min-height: 100vh;
+            color: #e5e7eb;
+        }
+
+        @@keyframes gradientFlow {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        .container { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, rgba(0, 0, 128, 0.95), rgba(26, 26, 110, 0.95));
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 24px 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo { display: flex; align-items: center; gap: 12px; padding-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); margin-bottom: 24px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #4a4aff, #000080); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; animation: iconPulse 3s ease infinite; }
+        @@keyframes iconPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .logo-text { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #8888ff, #4a4aff, #000080); background-size: 200% 200%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: textFlow 3s ease infinite; }
+        @@keyframes textFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 0; border-radius: 10px; color: #b0b0e0; transition: all 0.3s ease; cursor: pointer; text-decoration: none; }
+        .nav-item:hover, .nav-item.active { background: linear-gradient(90deg, rgba(74, 74, 255, 0.2), rgba(0, 0, 128, 0.2)); color: #8888ff; border-left: 2px solid #8888ff; }
+        .nav-item i { width: 20px; font-size: 18px; }
+
+        .main-content { flex: 1; margin-left: 280px; padding: 24px 32px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(0, 0, 128, 0.5), rgba(26, 26, 110, 0.5));
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .page-title { font-size: 24px; font-weight: 600; background: linear-gradient(135deg, #8888ff, #4a4aff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+        .user-info { position: relative; cursor: pointer; display: flex; align-items: center; gap: 16px; z-index: 10001; }
+        .avatar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: linear-gradient(135deg, #8888ff, #000080); border-radius: 40px; cursor: pointer; transition: all 0.3s ease; }
+        .avatar:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(136, 136, 255, 0.5); }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 128, 0.98), rgba(26, 26, 110, 0.98));
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(136, 136, 255, 0.4);
+            min-width: 220px;
+            display: none;
+            z-index: 10000 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        .dropdown-menu.show { display: block; animation: fadeIn 0.2s ease; }
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-menu a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #e5e7eb; text-decoration: none; transition: all 0.2s ease; }
+        .dropdown-menu a:hover { background: rgba(136, 136, 255, 0.2); }
+        .dropdown-menu hr { margin: 5px 0; border-color: rgba(136, 136, 255, 0.2); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 0, 128, 0.6), rgba(26, 26, 110, 0.6));
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(136, 136, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        .stat-card:hover::before { left: 100%; }
+        .stat-card:hover { transform: translateY(-5px); border-color: rgba(136, 136, 255, 0.4); box-shadow: 0 10px 30px rgba(0, 0, 128, 0.3); }
+        .stat-title { font-size: 13px; color: #b0b0e0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #8888ff, #4a4aff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .stat-change { font-size: 12px; margin-top: 8px; background: linear-gradient(135deg, #34d399, #10b981); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+        .card { background: linear-gradient(135deg, rgba(0, 0, 128, 0.5), rgba(26, 26, 110, 0.5)); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 24px; overflow: hidden; transition: all 0.3s ease; }
+        .card:hover { border-color: rgba(136, 136, 255, 0.3); box-shadow: 0 5px 20px rgba(0, 0, 128, 0.2); }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-weight: 600; background: linear-gradient(90deg, rgba(136, 136, 255, 0.05), transparent); color: #c0c0f0; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 20px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        th { color: #b0b0e0; font-weight: 500; font-size: 12px; text-transform: uppercase; }
+        td { color: #d0d0f0; }
+        tr:hover { background: rgba(136, 136, 255, 0.05); }
+
+        .status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+        .status.active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status.enter { background: rgba(0, 229, 255, 0.2); color: #00e5ff; }
+        .status.exit { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+        .device-mac { font-family: monospace; font-size: 12px; letter-spacing: 0.5px; }
+
+        .btn-wifi { padding: 10px 20px; background: linear-gradient(135deg, #00aaff, #0066cc); border: none; border-radius: 8px; color: #fff; cursor: pointer; transition: transform 0.2s; margin-bottom: 16px; }
+        .btn-wifi:hover { transform: scale(1.02); background: linear-gradient(135deg, #00bbff, #0077dd); }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 20000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loading-overlay.show { display: flex; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(136, 136, 255, 0.3); border-top: 4px solid #8888ff; border-radius: 50%; animation: spin 1s linear infinite; }
+        @@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { margin-top: 15px; color: #8888ff; }
+
+        @@media (max-width: 1024px) {
+            .sidebar { width: 80px; }
+            .logo-text, .nav-item span { display: none; }
+            .main-content { margin-left: 80px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+            /* Notification Popup Styles */
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 300px;
+            }
+
+            .notification {
+                background: linear-gradient(135deg, #1a1a3e, #0f0f2a);
+                border-left: 4px solid #00e5ff;
+                border-radius: 10px;
+                padding: 12px 15px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                animation: slideInRight 0.3s ease, fadeOut 0.5s ease 4.5s forwards;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                backdrop-filter: blur(10px);
+            }
+
+                .notification.enter {
+                    border-left-color: #00e5ff;
+                }
+
+                .notification.exit {
+                    border-left-color: #ff6b6b;
+                }
+
+            .notification-icon {
+                font-size: 24px;
+            }
+
+            .notification-content {
+                flex: 1;
+            }
+
+            .notification-title {
+                font-weight: bold;
+                font-size: 13px;
+                margin-bottom: 4px;
+            }
+
+                .notification-title.enter {
+                    color: #00e5ff;
+                }
+
+                .notification-title.exit {
+                    color: #ff6b6b;
+                }
+
+            .notification-message {
+                font-size: 11px;
+                color: #c0c0f0;
+                line-height: 1.4;
+            }
+
+            .notification-time {
+                font-size: 9px;
+                color: #6b7280;
+                margin-top: 4px;
+            }
+
+            @@keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @@keyframes fadeOut {
+                to {
+                    opacity: 0;
+                    visibility: hidden;
+                }
+            }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">👁️</div>
+                <div class="logo-text">Compound Sentry</div>
+            </div>
+            <a href="/Dashboard" class="nav-item active"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+            <a href="/Dashboard/Devices" class="nav-item"><i class="fas fa-mobile-alt"></i><span>Devices</span></a>
+            <a href="/Dashboard/Analytics" class="nav-item"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+            <a href="/Dashboard/Settings" class="nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <div class="avatar" id="avatarButton" onclick="toggleDropdown()">
+                        👤 <i class="fas fa-chevron-down" style="font-size: 12px; margin-left: 5px;"></i>
+                    </div>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/Dashboard/MyProfile"><i class="fas fa-user"></i> My Profile</a>
+                        <hr>
+                        <a href="/Dashboard/AdminSettings"><i class="fas fa-cog"></i> Settings</a>
+                        <hr>
+                        <a href="/Account/Logout" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <button class="btn-wifi" id="scanDashboardBtn" onclick="scanWiFiFromDashboard()">
+                    <i class="fas fa-wifi"></i> Scan Wi-Fi Network
+                </button>
+                <span id="lastScanTime" style="margin-left: 15px; font-size: 12px; color: #9ca3af;"></span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Devices Today</div>
+                    <div class="stat-value" id="totalDevices">0</div>
+                    <div class="stat-change">↑ Live</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Currently Present</div>
+                    <div class="stat-value" id="currentCount">0</div>
+                    <div class="stat-change">Active now</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Peak Concurrent</div>
+                    <div class="stat-value" id="peakCount">0</div>
+                    <div class="stat-change">Today's max</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Avg Visit Duration</div>
+                    <div class="stat-value" id="avgDuration">0<span style="font-size:14px">min</span></div>
+                    <div class="stat-change">Last 24h</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="fas fa-mobile-alt"></i> Currently Present Devices</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Device MAC</th>
+                            <th>Device Name</th>
+                            <th>IP Address</th>
+                            <th>First Seen</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="currentDevicesTable">
+                        <tr><td colspan="5" style="text-align:center">Loading devices...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><i class="fas fa-history"></i> Recent Activity Log</div>
+                <table>
+                    <thead>
+                        <tr><th>Time</th><th>Device MAC</th><th>Device Name</th><th>Event</th><th>Duration</th>
+                    </thead>
+                    <tbody id="activityTableBody">
+                        <tr><td colspan="5" style="text-align:center">Loading activity...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+        <!-- Notification Container -->
+        <div class="notification-container" id="notificationContainer"></div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Scanning Wi-Fi Network...</div>
+            <div class="loading-text" style="font-size: 12px; margin-top: 5px;">This may take 5-10 seconds</div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+        <script>
+            // ========== GLOBAL VARIABLES ==========
+            var inactivityTimer = null;
+            let previousDevicesSet = new Set();
+            let deviceStatus = {};
+            let animationQueue = [];
+            let isAnimating = false;
+
+            // ========== HELPER FUNCTIONS ==========
+            function toggleDropdown() {
+            var menu = document.getElementById('dropdownMenu');
+            if (menu) menu.classList.toggle('show');
+            }
+
+            document.getElementById('avatarButton')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleDropdown();
+            });
+
+            document.addEventListener('click', function(e) {
+            var menu = document.getElementById('dropdownMenu');
+            var btn = document.getElementById('avatarButton');
+            if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.remove('show');
+            }
+            });
+
+            function showToast(message, type) {
+            var toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(function() { if (toast && toast.parentNode) toast.remove(); }, 3500);
+            }
+
+            // ========== KENYA TIME CONVERSION ==========
+            function convertToKenyaTime(serverDate) {
+            if (!serverDate) return null;
+            const date = new Date(serverDate);
+            if (isNaN(date.getTime())) return null;
+            const kenyaTimeString = date.toLocaleString("en-US", { timeZone: "Africa/Nairobi" });
+            return new Date(kenyaTimeString);
+            }
+
+            function formatToKenyaTime(timestamp) {
+            if (!timestamp) return '-';
+            const kenyaDate = convertToKenyaTime(timestamp);
+            if (!kenyaDate || isNaN(kenyaDate.getTime())) return '-';
+            let hours = kenyaDate.getHours();
+            const minutes = kenyaDate.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${hours}:${minutes} ${ampm}`;
+            }
+
+            // ========== SIGNALR CONNECTION ==========
+            const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/dashboardHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+            connection.start().catch(err => console.error(err));
+
+            connection.on("ReceiveCurrentDevices", (devices) => {
+            console.log("Real-time device update received:", devices.length);
+
+            const newDevicesSet = new Set(devices.map(d => d.macAddress));
+            const enteredDevices = devices.filter(d => !previousDevicesSet.has(d.macAddress));
+            const exitedDevices = [...previousDevicesSet].filter(mac => !newDevicesSet.has(mac));
+
+            previousDevicesSet = newDevicesSet;
+
+            // Update device status
+            const currentDevices = {};
+            devices.forEach(d => { currentDevices[d.macAddress] = { ipAddress: d.ipAddress, phoneType: d.phoneType }; });
+            deviceStatus = currentDevices;
+
+            // Update table with sequential animations
+            updateDevicesTableSequential(devices, enteredDevices, exitedDevices);
+            });
+
+            connection.on("ReceiveRecentActivity", (activities) => {
+            console.log("Activity update received:", activities.length);
+            updateActivityTable(activities);
+            });
+
+            connection.on("ReceiveStats", (stats) => {
+            console.log("Stats update received:", stats);
+            updateStatsCards(stats);
+            });
+
+            // ========== SEQUENTIAL ANIMATION FOR DEVICES TABLE ==========
+            function updateDevicesTableSequential(devices, enteredDevices, exitedDevices) {
+            const tbody = document.getElementById('currentDevicesTable');
+            if (!tbody) return;
+
+            const sortedDevices = [...devices].sort((a, b) => {
+            const dateA = a.firstSeen ? new Date(a.firstSeen) : 0;
+            const dateB = b.firstSeen ? new Date(b.firstSeen) : 0;
+            return dateB - dateA;
+            });
+
+            animationQueue = [];
+
+            // Add exit animations to queue (one by one)
+            exitedDevices.forEach((mac, index) => {
+            animationQueue.push({ type: 'exit', mac: mac, delay: index * 350 });
+            });
+
+            // Add enter animations to queue (one by one)
+            enteredDevices.forEach((device, index) => {
+            animationQueue.push({ type: 'enter', device: device, delay: (exitedDevices.length + index) * 350 });
+            });
+
+            if (!isAnimating) processAnimationQueue(tbody, sortedDevices);
+            }
+
+            function processAnimationQueue(tbody, allDevices) {
+            if (animationQueue.length === 0) {
+            isAnimating = false;
+            finalizeTable(tbody, allDevices);
+            return;
+            }
+
+            isAnimating = true;
+            const item = animationQueue.shift();
+
+            if (item.type === 'exit') {
+            const exitingRow = tbody.querySelector(`tr[data-mac="${item.mac}"]`);
+            if (exitingRow) {
+            exitingRow.classList.add('device-row-exit');
+            setTimeout(() => {
+            if (exitingRow && exitingRow.parentNode) exitingRow.remove();
+            setTimeout(() => processAnimationQueue(tbody, allDevices), 50);
+            }, 400);
+            } else {
+            processAnimationQueue(tbody, allDevices);
+            }
+            }
+            else if (item.type === 'enter') {
+            const d = item.device;
+            let firstSeen = d.firstSeen ? formatToKenyaTime(d.firstSeen) : '-';
+            const ipAddress = d.ipAddress || 'Unknown';
+
+            let existingRow = tbody.querySelector(`tr[data-mac="${d.macAddress}"]`);
+            if (existingRow) {
+            existingRow.cells[1].innerHTML = d.phoneType || 'Unknown';
+            existingRow.cells[2].innerHTML = ipAddress;
+            existingRow.cells[3].innerHTML = firstSeen;
+            existingRow.classList.add('device-highlight');
+            setTimeout(() => existingRow.classList.remove('device-highlight'), 500);
+            processAnimationQueue(tbody, allDevices);
+            } else {
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-mac', d.macAddress);
+            newRow.innerHTML = `
+            <td><span class="device-mac">${d.macAddress || 'N/A'}</span></td>
+            <td>${d.phoneType || 'Unknown'}</td>
+            <td>${ipAddress}</td>
+            <td>${firstSeen}</td>
+            <td><span class="status active">● Present</span></td>
+            `;
+            newRow.classList.add('device-row-enter');
+            if (tbody.firstChild) tbody.insertBefore(newRow, tbody.firstChild);
+            else tbody.appendChild(newRow);
+            setTimeout(() => {
+            newRow.classList.remove('device-row-enter');
+            processAnimationQueue(tbody, allDevices);
+            }, 450);
+            }
+            }
+            }
+
+            function finalizeTable(tbody, allDevices) {
+            if (!allDevices || allDevices.length === 0) {
+            if (tbody.children.length === 0 || tbody.children[0]?.colSpan === 5) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No devices currently present</td></tr>';
+            }
+            return;
+            }
+
+            const currentMacsInTable = new Set();
+            const rows = tbody.querySelectorAll('tr[data-mac]');
+            rows.forEach(row => { currentMacsInTable.add(row.getAttribute('data-mac')); });
+
+            allDevices.forEach(device => {
+            if (!currentMacsInTable.has(device.macAddress)) {
+            let firstSeen = device.firstSeen ? formatToKenyaTime(device.firstSeen) : '-';
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-mac', device.macAddress);
+            newRow.innerHTML = `
+            <td><span class="device-mac">${device.macAddress || 'N/A'}</span></td>
+            <td>${device.phoneType || 'Unknown'}</td>
+            <td>${device.ipAddress || 'Unknown'}</td>
+            <td>${firstSeen}</td>
+            <td><span class="status active">● Present</span></td>
+            `;
+            tbody.appendChild(newRow);
+            }
+            });
+            }
+
+            // ========== TABLE UPDATE FUNCTIONS ==========
+            function updateStatsCards(stats) {
+            if (!stats) return;
+            document.getElementById('totalDevices').innerText = stats.totalToday || 0;
+            document.getElementById('currentCount').innerText = stats.currentCount || 0;
+            document.getElementById('peakCount').innerText = stats.peakConcurrent || 0;
+            document.getElementById('avgDuration').innerHTML = (stats.avgDuration || 0) + '<span style="font-size:14px">min</span>';
+            }
+
+            function updateActivityTable(activities) {
+            const tbody = document.getElementById('activityTableBody');
+            if (!tbody) return;
+
+            if (activities.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No activity yet</td></tr>';
+            return;
+            }
+
+            let html = '';
+            for (let i = 0; i < activities.length; i++) {
+            const a = activities[i];
+            const statusClass = a.eventType === 'ENTER' ? 'enter' : 'exit';
+            const statusIcon = a.eventType === 'ENTER' ? '▶' : '◀';
+            let duration = '-';
+            let timeDisplay = a.eventTimestamp ? formatToKenyaTime(a.eventTimestamp) : '-';
+
+            if (a.eventType === 'EXIT' && a.durationSeconds) {
+            const mins = Math.floor(a.durationSeconds / 60);
+            const secs = a.durationSeconds % 60;
+            duration = mins + 'm ' + secs + 's';
+            } else if (a.eventType === 'ENTER') {
+            duration = 'Connected';
+            }
+
+            html += '<tr>' +
+            '<td>' + timeDisplay + '</td>' +
+            '<td><span class="device-mac">' + (a.macAddress || 'N/A') + '</span></td>' +
+            '<td>' + (a.phoneType || 'Unknown') + '</td>' +
+            '<td><span class="status ' + statusClass + '">' + statusIcon + ' ' + a.eventType + '</span></td>' +
+            '<td>' + duration + '</td>' +
+            '</tr>';
+            }
+            tbody.innerHTML = html;
+            }
+
+            // ========== LOAD DATA FROM API ==========
+            async function loadDashboardData() {
+            try {
+            var statsRes = await fetch('/api/dashboard/stats');
+            if (statsRes.ok) updateStatsCards(await statsRes.json());
+
+            var devicesRes = await fetch('/api/dashboard/devices');
+            if (devicesRes.ok) {
+            var devices = await devicesRes.json();
+            previousDevicesSet = new Set(devices.map(d => d.macAddress));
+            updateDevicesTableSequential(devices, devices, []);
+            }
+
+            var activityRes = await fetch('/api/dashboard/activity');
+            if (activityRes.ok) updateActivityTable(await activityRes.json());
+            } catch (err) {
+            console.error('Error loading dashboard:', err);
+            }
+            }
+
+            // ========== MANUAL SCAN ==========
+            async function scanWiFiFromDashboard() {
+            clearTimeout(inactivityTimer);
+            var overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('show');
+            var btn = document.getElementById('scanDashboardBtn');
+            var originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+            btn.disabled = true;
+
+            try {
+            var response = await fetch('/api/network/scan');
+            if (!response.ok) throw new Error('Scan failed');
+            var data = await response.json();
+            document.getElementById('lastScanTime').innerHTML = '<i class="fas fa-clock"></i> Last scan: ' + new Date().toLocaleTimeString();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await loadDashboardData();
+            showToast('Scan completed! Found ' + (data.length || 0) + ' devices', 'success');
+            } catch (err) {
+            showToast('Network scan failed. Make sure you are connected to Wi-Fi.', 'error');
+            } finally {
+            overlay.classList.remove('show');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            resetTimer();
+            }
+            }
+
+            // ========== INACTIVITY LOGOUT ==========
+            function resetTimer() {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(function() { window.location.href = '/Account/Logout'; }, 120000);
+            }
+
+            var events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'click', 'keydown'];
+            for (var i = 0; i < events.length; i++) document.addEventListener(events[i], resetTimer);
+            resetTimer();
+
+            // ========== INITIALIZE ==========
+            loadDashboardData();
+            setInterval(loadDashboardData, 30000);
+        </script>
+    </body>
+</html>

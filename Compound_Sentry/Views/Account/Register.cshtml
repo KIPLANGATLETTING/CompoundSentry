@@ -1,0 +1,188 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Register Admin - Compound Sentry";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Admin - Compound Sentry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #000080 0%, #1a1a6e 50%, #000060 100%);
+                background-size: 200% 200%;
+                animation: gradientFlow 8s ease infinite;
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            @@keyframes gradientFlow {
+                0% {
+                    background-position: 0% 0%;
+                }
+
+                50% {
+                    background-position: 100% 100%;
+                }
+
+                100% {
+                    background-position: 0% 0%;
+                }
+            }
+
+            .register-container {
+                background: rgba(0, 0, 128, 0.85);
+                backdrop-filter: blur(10px);
+                border-radius: 24px;
+                padding: 40px;
+                width: 450px;
+                border: 1px solid rgba(136, 136, 255, 0.3);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            .logo {
+                text-align: center;
+                margin-bottom: 32px;
+            }
+
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, #8888ff, #000080);
+                border-radius: 15px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 30px;
+                margin-bottom: 16px;
+            }
+
+            .logo-text {
+                font-size: 24px;
+                font-weight: 700;
+                background: linear-gradient(135deg, #8888ff, #4a4aff);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+
+            h2 {
+                color: #8888ff;
+                text-align: center;
+                margin-bottom: 24px;
+                font-size: 20px;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            input {
+                width: 100%;
+                padding: 12px 16px;
+                background: rgba(0, 0, 128, 0.4);
+                border: 1px solid rgba(136, 136, 255, 0.3);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 14px;
+            }
+
+                input:focus {
+                    outline: none;
+                    border-color: #8888ff;
+                }
+
+            button {
+                width: 100%;
+                padding: 12px;
+                background: linear-gradient(135deg, #8888ff, #4a4aff);
+                border: none;
+                border-radius: 8px;
+                color: #fff;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 16px;
+                transition: transform 0.2s;
+            }
+
+                button:hover {
+                    transform: scale(1.02);
+                }
+
+            .error {
+                color: #ef4444;
+                text-align: center;
+                margin-top: 16px;
+                font-size: 14px;
+            }
+
+            .login-link {
+                text-align: center;
+                margin-top: 24px;
+                color: #b0b0e0;
+            }
+
+                .login-link a {
+                    color: #8888ff;
+                    text-decoration: none;
+                }
+
+                    .login-link a:hover {
+                        text-decoration: underline;
+                    }
+
+            .password-hint {
+                font-size: 12px;
+                color: #9ca3af;
+                margin-top: 5px;
+            }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <div class="logo-icon">👁️</div>
+            <div class="logo-text">Compound Sentry</div>
+        </div>
+        <h2>Create Admin Account</h2>
+        <form method="post" action="/Account/Register">
+            <div class="input-group">
+                <input type="text" name="fullName" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+                <div class="password-hint">Password must be at least 6 characters</div>
+            </div>
+            <div class="input-group">
+                <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+            </div>
+            <button type="submit">Register</button>
+            @if (ViewBag.Error != null)
+            {
+                <div class="error">@ViewBag.Error</div>
+            }
+        </form>
+        <div class="login-link">
+            Already have an account? <a href="/Account/Login">Login</a>
+        </div>
+    </div>
+</body>
+</html>
