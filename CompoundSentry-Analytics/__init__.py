@@ -1,0 +1,1 @@
+"""Compound Sentry Analytics package."""
