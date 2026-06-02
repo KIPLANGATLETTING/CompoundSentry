@@ -305,15 +305,6 @@ Connection pooling for database connections
 
 ⭐ Star this repo if you find it useful!
 
-Report bugs via Issues
-
-This README now accurately reflects a **C# / .NET** system with:
-- ASP.NET Core for the web dashboard
-- Entity Framework Core for database access
-- SignalR for real-time notifications
-- RESTful API endpoints
-- Windows service deployment options
-
-Is this closer to what you actually built? If there are specific C# features or libraries you used (like Blazor, WinForms, WPF, etc.), let me know and I'll adjust accordingly!
+Report bugs via Issues:ckiplangat49@gmail.com
 
 
