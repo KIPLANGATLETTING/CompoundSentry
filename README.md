@@ -280,6 +280,7 @@ dotnet publish src/CompoundSentry.Web -c Release -o ./publish
 # Create and start Windows service
 New-Service -Name "CompoundSentry" -BinaryPathName "C:\publish\CompoundSentry.Web.exe"
 Start-Service -Name "CompoundSentry"
+```
 
 🔒 Security
 JWT Authentication - Secure API access
