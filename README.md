@@ -305,6 +305,6 @@ Connection pooling for database connections
 
 ⭐ Star this repo if you find it useful!
 
-Report bugs via Issues:ckiplangat49@gmail.com
+Report bugs via email: [ckiplangat49@gmail.com](ckiplangat49@gmail.com)
 
 
