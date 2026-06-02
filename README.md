@@ -305,6 +305,6 @@ Connection pooling for database connections
 
 ⭐ Star this repo if you find it useful!
 
-Report bugs via: [![email](https://img.shields.io/badge/Email-D14836?logoColor=white)](mailto:ckiplangat49@gmail.com)
+Report bugs via: [![email](https://img.shields.io/badge/Email-D14836?logo=gmail&logoColor=white)](mailto:ckiplangat49@gmail.com)
 
 
